@@ -28,11 +28,12 @@ import { Services, servicesRoute, servicesURL } from "../+network-services";
 import { endpointRoute, Endpoints, endpointURL } from "../+network-endpoints";
 import { Ingresses, ingressRoute, ingressURL } from "../+network-ingresses";
 import { NetworkPolicies, networkPoliciesRoute, networkPoliciesURL } from "../+network-policies";
-import { isAllowedResource } from "../../../common/rbac";
+import { isAllowedResource } from "../../api/allowed-resources";
+import { computed } from "mobx";
 
 @observer
 export class Network extends React.Component {
-  static get tabRoutes(): TabLayoutRoute[] {
+  @computed static get tabRoutes(): TabLayoutRoute[] {
     const routes: TabLayoutRoute[] = [];
 
     if (isAllowedResource("services")) {
@@ -76,7 +77,7 @@ export class Network extends React.Component {
 
   render() {
     return (
-      <TabLayout className="Network" tabs={Network.tabRoutes}/>
+      <TabLayout className="Network" tabs={Network.tabRoutes} />
     );
   }
 }

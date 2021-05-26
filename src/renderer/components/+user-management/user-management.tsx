@@ -28,11 +28,12 @@ import { RoleBindings } from "../+user-management-roles-bindings";
 import { ServiceAccounts } from "../+user-management-service-accounts";
 import { podSecurityPoliciesRoute, podSecurityPoliciesURL, roleBindingsRoute, roleBindingsURL, rolesRoute, rolesURL, serviceAccountsRoute, serviceAccountsURL } from "./user-management.route";
 import { PodSecurityPolicies } from "../+pod-security-policies";
-import { isAllowedResource } from "../../../common/rbac";
+import { isAllowedResource, isAnyAllowedResources } from "../../api/allowed-resources";
+import { computed } from "mobx";
 
 @observer
 export class UserManagement extends React.Component {
-  static get tabRoutes() {
+  @computed static get tabRoutes() {
     const tabRoutes: TabLayoutRoute[] = [];
 
     if (isAllowedResource("serviceaccounts")) {
@@ -44,7 +45,7 @@ export class UserManagement extends React.Component {
       });
     }
 
-    if (isAllowedResource("rolebindings") || isAllowedResource("clusterrolebindings")) {
+    if (isAnyAllowedResources("rolebindings", "clusterrolebindings")) {
       // TODO: seperate out these two pages
       tabRoutes.push({
         title: "Role Bindings",
@@ -54,7 +55,7 @@ export class UserManagement extends React.Component {
       });
     }
 
-    if (isAllowedResource("roles") || isAllowedResource("clusterroles")) {
+    if (isAnyAllowedResources("roles", "clusterroles")) {
       // TODO: seperate out these two pages
       tabRoutes.push({
         title: "Roles",
@@ -78,7 +79,7 @@ export class UserManagement extends React.Component {
 
   render() {
     return (
-      <TabLayout className="UserManagement" tabs={UserManagement.tabRoutes}/>
+      <TabLayout className="UserManagement" tabs={UserManagement.tabRoutes} />
     );
   }
 }

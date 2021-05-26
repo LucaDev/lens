@@ -35,7 +35,7 @@ import { replicaSetStore } from "../+workloads-replicasets/replicasets.store";
 import { jobStore } from "../+workloads-jobs/job.store";
 import { cronJobStore } from "../+workloads-cronjobs/cronjob.store";
 import { Events } from "../+events";
-import { isAllowedResource } from "../../../common/rbac";
+import { isAllowedResource } from "../../api/allowed-resources";
 import { kubeWatchApi } from "../../api/kube-watch-api";
 import { clusterContext } from "../context";
 
@@ -59,8 +59,8 @@ export class WorkloadsOverview extends React.Component<Props> {
   render() {
     return (
       <div className="WorkloadsOverview flex column gaps">
-        <OverviewStatuses/>
-        {isAllowedResource("events") && <Events compact hideFilters className="box grow"/>}
+        <OverviewStatuses />
+        {isAllowedResource("events") && <Events compact hideFilters className="box grow" />}
       </div>
     );
   }

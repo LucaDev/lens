@@ -27,11 +27,12 @@ import { TabLayout, TabLayoutRoute } from "../layout/tab-layout";
 import { PersistentVolumes, volumesRoute, volumesURL } from "../+storage-volumes";
 import { StorageClasses, storageClassesRoute, storageClassesURL } from "../+storage-classes";
 import { PersistentVolumeClaims, volumeClaimsRoute, volumeClaimsURL } from "../+storage-volume-claims";
-import { isAllowedResource } from "../../../common/rbac";
+import { isAllowedResource } from "../../api/allowed-resources";
+import { computed } from "mobx";
 
 @observer
 export class Storage extends React.Component {
-  static get tabRoutes() {
+  @computed static get tabRoutes() {
     const tabRoutes: TabLayoutRoute[] = [];
 
     if (isAllowedResource("persistentvolumeclaims")) {
@@ -66,7 +67,7 @@ export class Storage extends React.Component {
 
   render() {
     return (
-      <TabLayout className="Storage" tabs={Storage.tabRoutes}/>
+      <TabLayout className="Storage" tabs={Storage.tabRoutes} />
     );
   }
 }

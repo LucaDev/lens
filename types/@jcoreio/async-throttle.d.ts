@@ -19,34 +19,18 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import React from "react";
-import { observer } from "mobx-react";
-import { TabLayout, TabLayoutRoute } from "../layout/tab-layout";
-import { HelmCharts, helmChartsRoute, helmChartsURL } from "../+apps-helm-charts";
-import { HelmReleases, releaseRoute, releaseURL } from "../+apps-releases";
+declare module "@jcoreio/async-throttle";
 
-@observer
-export class Apps extends React.Component {
-  static get tabRoutes(): TabLayoutRoute[] {
-    return [
-      {
-        title: "Charts",
-        component: HelmCharts,
-        url: helmChartsURL(),
-        routePath: helmChartsRoute.path.toString(),
-      },
-      {
-        title: "Releases",
-        component: HelmReleases,
-        url: releaseURL(),
-        routePath: releaseRoute.path.toString(),
-      },
-    ];
-  }
+export default throttle;
 
-  render() {
-    return (
-      <TabLayout className="Apps" tabs={Apps.tabRoutes}/>
-    );
-  }
-}
+declare function throttle<F extends (...args: any[]) => Promise<any>>(
+  fn: F,
+  wait?: number,
+  options?: {
+    getNextArgs?: (args0: Parameters<F>, args1: Parameters<F>) => Parameters<F>,
+  },
+): {
+  (...args: Parameters<F>): ReturnType<F>,
+  cancel: () => Promise<void>,
+  flush: () => Promise<void>,
+};

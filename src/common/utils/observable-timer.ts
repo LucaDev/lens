@@ -19,34 +19,23 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import React from "react";
-import { observer } from "mobx-react";
-import { TabLayout, TabLayoutRoute } from "../layout/tab-layout";
-import { HelmCharts, helmChartsRoute, helmChartsURL } from "../+apps-helm-charts";
-import { HelmReleases, releaseRoute, releaseURL } from "../+apps-releases";
+import { computed, observable, runInAction } from "mobx";
 
-@observer
-export class Apps extends React.Component {
-  static get tabRoutes(): TabLayoutRoute[] {
-    return [
-      {
-        title: "Charts",
-        component: HelmCharts,
-        url: helmChartsURL(),
-        routePath: helmChartsRoute.path.toString(),
-      },
-      {
-        title: "Releases",
-        component: HelmReleases,
-        url: releaseURL(),
-        routePath: releaseRoute.path.toString(),
-      },
-    ];
+export class ObservableTimer {
+  protected counter = observable.box(0);
+  protected timeout: NodeJS.Timeout;
+
+  constructor(tickPeriod: number) {
+    this.timeout = setInterval(() => runInAction(() => {
+      this.counter.set(this.counter.get() + 1);
+    }), tickPeriod);
   }
 
-  render() {
-    return (
-      <TabLayout className="Apps" tabs={Apps.tabRoutes}/>
-    );
+  @computed get tickCount() {
+    return this.counter.get();
+  }
+
+  dispose() {
+    clearInterval(this.timeout);
   }
 }

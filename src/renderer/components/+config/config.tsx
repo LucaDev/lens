@@ -27,12 +27,13 @@ import { Secrets, secretsRoute, secretsURL } from "../+config-secrets";
 import { resourceQuotaRoute, ResourceQuotas, resourceQuotaURL } from "../+config-resource-quotas";
 import { pdbRoute, pdbURL, PodDisruptionBudgets } from "../+config-pod-disruption-budgets";
 import { HorizontalPodAutoscalers, hpaRoute, hpaURL } from "../+config-autoscalers";
-import { isAllowedResource } from "../../../common/rbac";
 import { LimitRanges, limitRangesRoute, limitRangeURL } from "../+config-limit-ranges";
+import { isAllowedResource } from "../../api/allowed-resources";
+import { computed } from "mobx";
 
 @observer
 export class Config extends React.Component {
-  static get tabRoutes(): TabLayoutRoute[] {
+  @computed static get tabRoutes(): TabLayoutRoute[] {
     const routes: TabLayoutRoute[] = [];
 
     if (isAllowedResource("configmaps")) {
@@ -94,7 +95,7 @@ export class Config extends React.Component {
 
   render() {
     return (
-      <TabLayout className="Config" tabs={Config.tabRoutes}/>
+      <TabLayout className="Config" tabs={Config.tabRoutes} />
     );
   }
 }

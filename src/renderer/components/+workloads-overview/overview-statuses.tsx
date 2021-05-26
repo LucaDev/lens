@@ -28,9 +28,9 @@ import { Link } from "react-router-dom";
 import { workloadURL, workloadStores } from "../+workloads";
 import { namespaceStore } from "../+namespaces/namespace.store";
 import { NamespaceSelectFilter } from "../+namespaces/namespace-select-filter";
-import { isAllowedResource, KubeResource } from "../../../common/rbac";
-import { ResourceNames } from "../../utils/rbac";
+import { isAllowedResource } from "../../api/allowed-resources";
 import { boundMethod } from "../../utils";
+import { KubeResource, ResourceNames } from "../../../common/rbac";
 
 const resources: KubeResource[] = [
   "pods",

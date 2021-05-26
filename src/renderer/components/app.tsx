@@ -46,7 +46,6 @@ import { DeploymentScaleDialog } from "./+workloads-deployments/deployment-scale
 import { CronJobTriggerDialog } from "./+workloads-cronjobs/cronjob-trigger-dialog";
 import { CustomResources } from "./+custom-resources/custom-resources";
 import { crdRoute } from "./+custom-resources";
-import { isAllowedResource } from "../../common/rbac";
 import { MainLayout } from "./layout/main-layout";
 import { ErrorBoundary } from "./error-boundary";
 import { Terminal } from "./dock/terminal";
@@ -71,6 +70,7 @@ import { CommandContainer } from "./command-palette/command-container";
 import { KubeObjectStore } from "../kube-object.store";
 import { clusterContext } from "./context";
 import { namespaceStore } from "./+namespaces/namespace.store";
+import { AllowedResources, isAllowedResources } from "../api/allowed-resources";
 
 @observer
 export class App extends React.Component {
@@ -82,6 +82,8 @@ export class App extends React.Component {
   static async init() {
     const frameId = webFrame.routingId;
     const clusterId = getHostedClusterId();
+
+    await AllowedResources.createInstance(clusterId, () => clusterContext.contextNamespaces).init();
 
     logger.info(`[APP]: Init dashboard, clusterId=${clusterId}, frameId=${frameId}`);
     await Terminal.preloadFonts();
@@ -116,7 +118,7 @@ export class App extends React.Component {
     ]);
   }
 
-  @observable startUrl = isAllowedResource(["events", "nodes", "pods"]) ? clusterURL() : workloadsURL();
+  @observable startUrl = isAllowedResources("events", "nodes", "pods") ? clusterURL() : workloadsURL();
 
   getTabLayoutRoutes(menuItem: ClusterPageMenuRegistration) {
     const routes: TabLayoutRoute[] = [];
@@ -145,14 +147,14 @@ export class App extends React.Component {
       const tabRoutes = this.getTabLayoutRoutes(menu);
 
       if (tabRoutes.length > 0) {
-        const pageComponent = () => <TabLayout tabs={tabRoutes}/>;
+        const pageComponent = () => <TabLayout tabs={tabRoutes} />;
 
-        return <Route key={`extension-tab-layout-route-${index}`} component={pageComponent} path={tabRoutes.map((tab) => tab.routePath)}/>;
+        return <Route key={`extension-tab-layout-route-${index}`} component={pageComponent} path={tabRoutes.map((tab) => tab.routePath)} />;
       } else {
         const page = clusterPageRegistry.getByPageTarget(menu.target);
 
         if (page) {
-          return <Route key={`extension-tab-layout-route-${index}`} path={page.url} component={page.components.Page}/>;
+          return <Route key={`extension-tab-layout-route-${index}`} path={page.url} component={page.components.Page} />;
         }
       }
 
@@ -165,7 +167,7 @@ export class App extends React.Component {
       const menu = clusterPageMenuRegistry.getByPage(page);
 
       if (!menu) {
-        return <Route key={`extension-route-${index}`} path={page.url} component={page.components.Page}/>;
+        return <Route key={`extension-route-${index}`} path={page.url} component={page.components.Page} />;
       }
 
       return null;
@@ -178,33 +180,33 @@ export class App extends React.Component {
         <ErrorBoundary>
           <MainLayout>
             <Switch>
-              <Route component={ClusterOverview} {...clusterRoute}/>
-              <Route component={Nodes} {...nodesRoute}/>
-              <Route component={Workloads} {...workloadsRoute}/>
-              <Route component={Config} {...configRoute}/>
-              <Route component={Network} {...networkRoute}/>
-              <Route component={Storage} {...storageRoute}/>
-              <Route component={Namespaces} {...namespacesRoute}/>
-              <Route component={Events} {...eventRoute}/>
-              <Route component={CustomResources} {...crdRoute}/>
-              <Route component={UserManagement} {...usersManagementRoute}/>
-              <Route component={Apps} {...appsRoute}/>
+              <Route component={ClusterOverview} {...clusterRoute} />
+              <Route component={Nodes} {...nodesRoute} />
+              <Route component={Workloads} {...workloadsRoute} />
+              <Route component={Config} {...configRoute} />
+              <Route component={Network} {...networkRoute} />
+              <Route component={Storage} {...storageRoute} />
+              <Route component={Namespaces} {...namespacesRoute} />
+              <Route component={Events} {...eventRoute} />
+              <Route component={CustomResources} {...crdRoute} />
+              <Route component={UserManagement} {...usersManagementRoute} />
+              <Route component={Apps} {...appsRoute} />
               {this.renderExtensionTabLayoutRoutes()}
               {this.renderExtensionRoutes()}
-              <Redirect exact from="/" to={this.startUrl}/>
-              <Route component={NotFound}/>
+              <Redirect exact from="/" to={this.startUrl} />
+              <Route component={NotFound} />
             </Switch>
           </MainLayout>
-          <Notifications/>
-          <ConfirmDialog/>
-          <KubeObjectDetails/>
-          <KubeConfigDialog/>
-          <AddRoleBindingDialog/>
-          <DeploymentScaleDialog/>
-          <StatefulSetScaleDialog/>
-          <ReplicaSetScaleDialog/>
-          <CronJobTriggerDialog/>
-          <CommandContainer clusterId={getHostedCluster()?.id}/>
+          <Notifications />
+          <ConfirmDialog />
+          <KubeObjectDetails />
+          <KubeConfigDialog />
+          <AddRoleBindingDialog />
+          <DeploymentScaleDialog />
+          <StatefulSetScaleDialog />
+          <ReplicaSetScaleDialog />
+          <CronJobTriggerDialog />
+          <CommandContainer clusterId={getHostedCluster()?.id} />
         </ErrorBoundary>
       </Router>
     );

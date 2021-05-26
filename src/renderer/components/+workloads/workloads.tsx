@@ -32,12 +32,13 @@ import { DaemonSets } from "../+workloads-daemonsets";
 import { StatefulSets } from "../+workloads-statefulsets";
 import { Jobs } from "../+workloads-jobs";
 import { CronJobs } from "../+workloads-cronjobs";
-import { isAllowedResource } from "../../../common/rbac";
+import { isAllowedResource } from "../../api/allowed-resources";
 import { ReplicaSets } from "../+workloads-replicasets";
+import { computed } from "mobx";
 
 @observer
 export class Workloads extends React.Component {
-  static get tabRoutes(): TabLayoutRoute[] {
+  @computed static get tabRoutes(): TabLayoutRoute[] {
     const routes: TabLayoutRoute[] = [
       {
         title: "Overview",
@@ -115,7 +116,7 @@ export class Workloads extends React.Component {
 
   render() {
     return (
-      <TabLayout className="Workloads" tabs={Workloads.tabRoutes}/>
+      <TabLayout className="Workloads" tabs={Workloads.tabRoutes} />
     );
   }
 }

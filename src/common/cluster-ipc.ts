@@ -19,7 +19,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { handleRequest } from "./ipc";
+import { ClusterResourceIsAllowedChannel, ClusterGetResourcesChannel, handleRequest } from "./ipc";
 import { ClusterId, ClusterStore } from "./cluster-store";
 import { appEventBus } from "./event-bus";
 import { ResourceApplier } from "../main/resource-applier";
@@ -56,7 +56,7 @@ if (ipcMain) {
   });
 
   handleRequest(clusterDisconnectHandler, (event, clusterId: ClusterId) => {
-    appEventBus.emit({name: "cluster", action: "stop"});
+    appEventBus.emit({ name: "cluster", action: "stop" });
     const cluster = ClusterStore.getInstance().getById(clusterId);
 
     if (cluster) {
@@ -66,7 +66,7 @@ if (ipcMain) {
   });
 
   handleRequest(clusterKubectlApplyAllHandler, async (event, clusterId: ClusterId, resources: string[], extraArgs: string[]) => {
-    appEventBus.emit({name: "cluster", action: "kubectl-apply-all"});
+    appEventBus.emit({ name: "cluster", action: "kubectl-apply-all" });
     const cluster = ClusterStore.getInstance().getById(clusterId);
 
     if (cluster) {
@@ -85,7 +85,7 @@ if (ipcMain) {
   });
 
   handleRequest(clusterKubectlDeleteAllHandler, async (event, clusterId: ClusterId, resources: string[], extraArgs: string[]) => {
-    appEventBus.emit({name: "cluster", action: "kubectl-delete-all"});
+    appEventBus.emit({ name: "cluster", action: "kubectl-delete-all" });
     const cluster = ClusterStore.getInstance().getById(clusterId);
 
     if (cluster) {
@@ -101,5 +101,31 @@ if (ipcMain) {
     } else {
       throw `${clusterId} is not a valid cluster id`;
     }
+  });
+
+  ipcMain.handle(ClusterGetResourcesChannel, async (event, clusterId: ClusterId) => {
+    return ClusterStore.getInstance()
+      .getById(clusterId)
+      ?.getApiResourceMap();
+  });
+
+  handleRequest(ClusterResourceIsAllowedChannel, async (event, clusterId: ClusterId, namespaces: string[]): Promise<[string, boolean][]> => {
+    const cluster = ClusterStore.getInstance().getById(clusterId);
+
+    if (!cluster) {
+      return [];
+    }
+
+    const isAllowed = new Map<string, boolean>();
+
+    await Promise.all(
+      namespaces.map(async namespace => {
+        for (const [resource, canList] of await cluster.getIsAllowedResources(namespace)) {
+          isAllowed.set(resource, Boolean(isAllowed.get(resource)) || canList);
+        }
+      })
+    );
+
+    return Array.from(isAllowed);
   });
 }
