@@ -21,10 +21,11 @@
 
 import { computed, observable, makeObservable, action } from "mobx";
 import { subscribeToBroadcast } from "../../common/ipc";
-import { CatalogCategory, catalogCategoryRegistry, CatalogCategoryRegistry, CatalogEntity, CatalogEntityData, CatalogEntityKindData } from "../../common/catalog";
+import { CatalogCategory, catalogCategoryRegistry, CatalogCategoryRegistry, CatalogEntity, CatalogEntityData, CatalogEntityKindData, metadata, spec, status } from "../../common/catalog";
 import "../../common/catalog-entities";
 import type { Cluster } from "../../main/cluster";
 import { ClusterStore } from "../../common/cluster-store";
+import deepFreeze from "../../../types/js-flock/deepFreeze";
 
 export class CatalogEntityRegistry {
   @observable.ref activeEntity: CatalogEntity;
@@ -73,9 +74,12 @@ export class CatalogEntityRegistry {
         this.rawEntities.push(item);
       }
     } else {
-      existing.metadata = item.metadata;
-      existing.spec = item.spec;
-      existing.status = item.status;
+      deepFreeze(item.metadata);
+      deepFreeze(item.status);
+      deepFreeze(item.spec);
+      existing[metadata] = item.metadata;
+      existing[spec] = item.spec;
+      existing[status] = item.status;
     }
   }
 

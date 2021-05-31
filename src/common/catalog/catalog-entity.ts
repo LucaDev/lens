@@ -22,6 +22,7 @@
 import EventEmitter from "events";
 import type TypedEmitter from "typed-emitter";
 import { observable, makeObservable } from "mobx";
+import deepFreeze from "js-flock/deepFreeze";
 
 type ExtractEntityMetadataType<Entity> = Entity extends CatalogEntity<infer Metadata> ? Metadata : never;
 type ExtractEntityStatusType<Entity> = Entity extends CatalogEntity<any, infer Status> ? Status : never;
@@ -136,7 +137,7 @@ export interface CatalogEntityData<
   Metadata extends CatalogEntityMetadata = CatalogEntityMetadata,
   Status extends CatalogEntityStatus = CatalogEntityStatus,
   Spec extends CatalogEntitySpec = CatalogEntitySpec,
-> {
+  > {
   metadata: Metadata;
   status: Status;
   spec: Spec;
@@ -147,23 +148,42 @@ export interface CatalogEntityKindData {
   readonly kind: string;
 }
 
+export const metadata = Symbol();
+export const status = Symbol();
+export const spec = Symbol();
+
 export abstract class CatalogEntity<
   Metadata extends CatalogEntityMetadata = CatalogEntityMetadata,
   Status extends CatalogEntityStatus = CatalogEntityStatus,
   Spec extends CatalogEntitySpec = CatalogEntitySpec,
-> implements CatalogEntityKindData {
+  > implements CatalogEntityKindData {
   public abstract readonly apiVersion: string;
   public abstract readonly kind: string;
 
-  @observable metadata: Metadata;
-  @observable status: Status;
-  @observable spec: Spec;
+  @observable [metadata]: Metadata;
+  @observable [status]: Status;
+  @observable [spec]: Spec;
+
+  get metadata() {
+    return this[metadata];
+  }
+
+  get status() {
+    return this[status];
+  }
+
+  get spec() {
+    return this[spec];
+  }
 
   constructor(data: CatalogEntityData<Metadata, Status, Spec>) {
     makeObservable(this);
-    this.metadata = data.metadata;
-    this.status = data.status;
-    this.spec = data.spec;
+    deepFreeze(data.metadata);
+    deepFreeze(data.status);
+    deepFreeze(data.spec);
+    this[metadata] = data.metadata;
+    this[status] = data.status;
+    this[spec] = data.spec;
   }
 
   public getId(): string {
